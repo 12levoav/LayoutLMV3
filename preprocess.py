@@ -149,23 +149,16 @@ if __name__ == '__main__':
     bboxes_chunks = list(divide_chunks(bboxes, n))
     ner_tags_chunks = list(divide_chunks(ner_tags, n))
     image_path_chunks = list(divide_chunks(image_path, n))
-    print(len(words_chunks))
     full_data_set = None
-    print((int(len(words) / n)))
-    print(len(words),len(bboxes),len(ner_tags),len(image_path))
     for index in range((int(len(words) / n))+1):
         dataset = Dataset.from_generator(gen, gen_kwargs={"words": words_chunks[index], "bboxes": bboxes_chunks[index],
                                                           "ner_tags": ner_tags_chunks[index],
                                                           "image_path": image_path_chunks[index]}, features=features)
-        print(len(dataset))
         dataset = dataset.filter(filter_out_unannotated)
-        print(len(dataset))
         if full_data_set is None:
             full_data_set = dataset
         else:
-            print(len(full_data_set))
             full_data_set = concatenate_datasets([full_data_set, dataset])
-    print(len(full_data_set))
     dataset = full_data_set.train_test_split(test_size=TEST_SIZE)
     processor = AutoProcessor.from_pretrained(
         "microsoft/layoutlmv3-large", apply_ocr=False)
